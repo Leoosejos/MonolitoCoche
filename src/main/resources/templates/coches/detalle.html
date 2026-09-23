@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Detalle del coche')}"></head>
+<body class="bg-body-tertiary">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container" style="max-width: 720px;">
+    <div class="card shadow-sm" th:object="${coche}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0" th:text="*{marca} + ' ' + *{modelo}">Coche</h1>
+            <span class="badge text-bg-dark fs-6" th:text="*{matricula}"></span>
+        </div>
+
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">ID</span><strong th:text="*{id}"></strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Año</span><strong th:text="*{anio}"></strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Color</span><strong th:text="*{color}"></strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Precio</span><strong th:text="${#numbers.formatDecimal(coche.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Kilometraje</span><strong th:text="${#numbers.formatInteger(coche.kilometraje, 1, 'POINT')} + ' km'"></strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Combustible</span><strong th:text="*{combustible.etiqueta}"></strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Transmisión</span><strong th:text="*{transmision.etiqueta}"></strong></li>
+        </ul>
+
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/coches}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver</a>
+            <a th:href="@{/coches/{id}/editar(id=*{id})}" class="btn btn-primary"><i class="bi bi-pencil"></i> Editar</a>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

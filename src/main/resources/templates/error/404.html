@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('No encontrado')}"></head>
+<body class="bg-body-tertiary">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container text-center py-5">
+    <h1 class="display-1 fw-bold text-primary">404</h1>
+    <p class="lead" th:text="${mensaje} ?: 'La página solicitada no existe.'"></p>
+    <a th:href="@{/coches}" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Volver al listado</a>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

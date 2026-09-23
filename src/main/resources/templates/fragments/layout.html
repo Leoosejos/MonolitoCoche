@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  FRAGMENTOS REUTILIZABLES
+  Se incluyen desde cada vista con th:replace="~{fragments/layout :: nombre}"
+  Así Bootstrap, la barra de navegación y el pie se definen una sola vez.
+-->
+
+<!-- ===== <head> con Bootstrap 5.3 (CDN) ===== -->
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' | Monolito Coche'">Monolito Coche</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+
+<!-- ===== Barra de navegación ===== -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg bg-primary mb-4" data-bs-theme="dark">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" th:href="@{/coches}">
+            <i class="bi bi-car-front-fill me-1"></i> Monolito Coche
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/coches}">Listado</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/coches/nuevo}">Nuevo coche</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== Mensajes flash ===== -->
+<div th:fragment="alertas" th:if="${exito}"
+     class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${exito}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- ===== Pie de página + JS de Bootstrap ===== -->
+<th:block th:fragment="footer">
+    <footer class="border-top py-3 mt-5 text-center text-body-secondary small">
+        Monolito Coche &middot; Spring Boot + Thymeleaf + Bootstrap 5.3
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+
+</body>
+</html>

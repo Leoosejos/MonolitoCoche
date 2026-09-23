@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Listado de coches')}"></head>
+<body class="bg-body-tertiary">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Coches <span class="badge text-bg-secondary" th:text="${#lists.size(coches)}">0</span></h1>
+        <a th:href="@{/coches/nuevo}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Nuevo coche
+        </a>
+    </div>
+
+    <!-- Sin registros -->
+    <div th:if="${#lists.isEmpty(coches)}" class="alert alert-info">
+        No hay coches registrados todavía.
+    </div>
+
+    <!-- Tabla de coches -->
+    <div th:unless="${#lists.isEmpty(coches)}" class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Matrícula</th>
+                    <th>Año</th>
+                    <th>Color</th>
+                    <th class="text-end">Precio</th>
+                    <th class="text-end">Kilometraje</th>
+                    <th>Combustible</th>
+                    <th>Transmisión</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${coches}">
+                    <td th:text="${c.id}"></td>
+                    <td th:text="${c.marca}"></td>
+                    <td th:text="${c.modelo}"></td>
+                    <td><span class="badge text-bg-dark" th:text="${c.matricula}"></span></td>
+                    <td th:text="${c.anio}"></td>
+                    <td th:text="${c.color}"></td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(c.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></td>
+                    <td class="text-end" th:text="${#numbers.formatInteger(c.kilometraje, 1, 'POINT')} + ' km'"></td>
+                    <td th:text="${c.combustible.etiqueta}"></td>
+                    <td th:text="${c.transmision.etiqueta}"></td>
+                    <td class="text-end text-nowrap">
+                        <a th:href="@{/coches/{id}(id=${c.id})}" class="btn btn-sm btn-outline-secondary" title="Ver">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a th:href="@{/coches/{id}/editar(id=${c.id})}" class="btn btn-sm btn-outline-primary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form th:action="@{/coches/{id}/eliminar(id=${c.id})}" method="post" class="d-inline"
+                              onsubmit="return confirm('¿Seguro que quieres eliminar este coche?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>
