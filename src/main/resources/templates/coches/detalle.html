@@ -1,32 +1,66 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
 <head th:replace="~{fragments/layout :: head('Detalle del coche')}"></head>
-<body class="bg-body-tertiary">
+<body class="tema-premium">
 
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<main class="container" style="max-width: 720px;">
-    <div class="card shadow-sm" th:object="${coche}">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h1 class="h4 mb-0" th:text="*{marca} + ' ' + *{modelo}">Coche</h1>
-            <span class="badge text-bg-dark fs-6" th:text="*{matricula}"></span>
+<main class="container pb-4" style="max-width: 760px;">
+    <article class="coche-card ficha" th:object="${coche}">
+
+        <!-- Cabecera con degradado según combustible -->
+        <div class="coche-cover"
+             th:classappend="${'fuel-' + #strings.toLowerCase(coche.combustible.name())}"
+             th:attr="data-inicial=${#strings.toUpperCase(#strings.substring(coche.marca, 0, 1))}">
+            <div class="coche-marca" th:text="*{marca}">Marca</div>
+            <h1 class="coche-modelo mb-3" th:text="*{modelo}">Modelo</h1>
+            <div class="d-flex align-items-center gap-2">
+                <span class="placa" th:text="*{matricula}">0000AAA</span>
+                <span class="chip-anio" th:text="*{anio}">2024</span>
+            </div>
         </div>
 
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">ID</span><strong th:text="*{id}"></strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Año</span><strong th:text="*{anio}"></strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Color</span><strong th:text="*{color}"></strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Precio</span><strong th:text="${#numbers.formatDecimal(coche.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Kilometraje</span><strong th:text="${#numbers.formatInteger(coche.kilometraje, 1, 'POINT')} + ' km'"></strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Combustible</span><strong th:text="*{combustible.etiqueta}"></strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span class="text-body-secondary">Transmisión</span><strong th:text="*{transmision.etiqueta}"></strong></li>
-        </ul>
+        <!-- Precio y especificaciones -->
+        <div class="coche-body">
+            <div class="precio">
+                <span th:text="${#numbers.formatDecimal(coche.precio, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                <small>€</small>
+            </div>
 
-        <div class="card-footer d-flex justify-content-end gap-2">
-            <a th:href="@{/coches}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver</a>
-            <a th:href="@{/coches/{id}/editar(id=*{id})}" class="btn btn-primary"><i class="bi bi-pencil"></i> Editar</a>
+            <dl class="ficha-specs">
+                <div>
+                    <dt><i class="bi bi-hash"></i> ID</dt>
+                    <dd th:text="*{id}"></dd>
+                </div>
+                <div>
+                    <dt><i class="bi bi-calendar3"></i> Año</dt>
+                    <dd th:text="*{anio}"></dd>
+                </div>
+                <div>
+                    <dt><i class="bi bi-speedometer2"></i> Kilometraje</dt>
+                    <dd th:text="${#numbers.formatInteger(coche.kilometraje, 1, 'POINT')} + ' km'"></dd>
+                </div>
+                <div>
+                    <dt><i class="bi bi-palette"></i> Color</dt>
+                    <dd th:text="*{color}"></dd>
+                </div>
+                <div>
+                    <dt><i th:class="${coche.combustible.name() == 'ELECTRICO'} ? 'bi bi-lightning-charge-fill' : 'bi bi-fuel-pump'"></i> Combustible</dt>
+                    <dd th:text="*{combustible.etiqueta}"></dd>
+                </div>
+                <div>
+                    <dt><i class="bi bi-gear-wide-connected"></i> Transmisión</dt>
+                    <dd th:text="*{transmision.etiqueta}"></dd>
+                </div>
+            </dl>
         </div>
-    </div>
+
+        <!-- Acciones -->
+        <div class="coche-footer justify-content-end">
+            <a th:href="@{/coches}" class="btn btn-outline-light flex-grow-0"><i class="bi bi-arrow-left"></i> Volver</a>
+            <a th:href="@{/coches/{id}/editar(id=*{id})}" class="btn btn-gold flex-grow-0"><i class="bi bi-pencil"></i> Editar</a>
+        </div>
+    </article>
 </main>
 
 <th:block th:replace="~{fragments/layout :: footer}"></th:block>
