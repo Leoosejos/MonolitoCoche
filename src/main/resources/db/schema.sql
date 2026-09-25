@@ -3,8 +3,8 @@
 --  Proyecto: MonolitoCoche
 --  Motor:    MySQL 8+
 --
---  Se ejecuta automáticamente al arrancar la aplicación (ver
---  application.properties) o manualmente desde MySQL Workbench / consola:
+--  Con JDBC la aplicación NO lo ejecuta sola: ejecútalo a mano desde
+--  phpMyAdmin (pestaña SQL), MySQL Workbench o consola:
 --      mysql -u root -p < schema.sql
 --  Es idempotente: se puede ejecutar varias veces sin error.
 -- =====================================================================

@@ -4,7 +4,7 @@
 --
 --  Ejecutar DESPUÉS de schema.sql.
 --  INSERT IGNORE evita errores si los datos ya existen (la matrícula es
---  única), así el script puede ejecutarse en cada arranque sin duplicar.
+--  única), así el script puede ejecutarse varias veces sin duplicar.
 -- =====================================================================
 
 USE monolito_coche;
