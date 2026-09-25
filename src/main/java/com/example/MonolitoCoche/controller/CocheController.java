@@ -11,18 +11,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- * CAPA CONTROLADOR (Presentación)
- * Recibe las peticiones HTTP, llama al servicio y devuelve la vista Thymeleaf.
- *
- *  GET  /coches                -> listado
- *  GET  /coches/{id}           -> detalle
- *  GET  /coches/nuevo          -> formulario de alta
- *  POST /coches                -> guardar nuevo
- *  GET  /coches/{id}/editar    -> formulario de edición
- *  POST /coches/{id}           -> guardar cambios
- *  POST /coches/{id}/eliminar  -> borrar
- */
 @Controller
 @RequestMapping("/coches")
 public class CocheController {

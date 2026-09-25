@@ -6,10 +6,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-/**
- * Manejo centralizado de errores para todos los controladores.
- * Muestra una vista amigable en lugar de la página de error por defecto.
- */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

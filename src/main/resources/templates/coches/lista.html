@@ -1,77 +1,131 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
 <head th:replace="~{fragments/layout :: head('Listado de coches')}"></head>
-<body class="bg-body-tertiary">
+<body class="tema-premium">
 
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<main class="container">
+<main class="container pb-4">
     <div th:replace="~{fragments/layout :: alertas}"></div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Coches <span class="badge text-bg-secondary" th:text="${#lists.size(coches)}">0</span></h1>
-        <a th:href="@{/coches/nuevo}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Nuevo coche
-        </a>
+    <!-- Cabecera: título, orden y botón de alta -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="h3 mb-0 titulo-seccion">
+            Coches <span class="badge rounded-pill contador" th:text="${#lists.size(coches)}">0</span>
+        </h1>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <select id="orden" class="form-select form-select-sm w-auto" aria-label="Ordenar coches"
+                    th:unless="${#lists.isEmpty(coches)}">
+                <option value="default:asc">Orden: marca y modelo</option>
+                <option value="precio:asc">Precio: menor a mayor</option>
+                <option value="precio:desc">Precio: mayor a menor</option>
+                <option value="anio:desc">Año: más nuevo primero</option>
+                <option value="anio:asc">Año: más antiguo primero</option>
+                <option value="kilometraje:asc">Kilometraje: menor a mayor</option>
+                <option value="kilometraje:desc">Kilometraje: mayor a menor</option>
+            </select>
+            <a th:href="@{/coches/nuevo}" class="btn btn-gold">
+                <i class="bi bi-plus-lg"></i> Nuevo coche
+            </a>
+        </div>
     </div>
 
     <!-- Sin registros -->
-    <div th:if="${#lists.isEmpty(coches)}" class="alert alert-info">
-        No hay coches registrados todavía.
+    <div th:if="${#lists.isEmpty(coches)}" class="vacio-premium">
+        <i class="bi bi-car-front"></i>
+        <p class="mt-2 mb-0">No hay coches registrados todavía.</p>
     </div>
 
-    <!-- Tabla de coches -->
-    <div th:unless="${#lists.isEmpty(coches)}" class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                    <th>Matrícula</th>
-                    <th>Año</th>
-                    <th>Color</th>
-                    <th class="text-end">Precio</th>
-                    <th class="text-end">Kilometraje</th>
-                    <th>Combustible</th>
-                    <th>Transmisión</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="c : ${coches}">
-                    <td th:text="${c.id}"></td>
-                    <td th:text="${c.marca}"></td>
-                    <td th:text="${c.modelo}"></td>
-                    <td><span class="badge text-bg-dark" th:text="${c.matricula}"></span></td>
-                    <td th:text="${c.anio}"></td>
-                    <td th:text="${c.color}"></td>
-                    <td class="text-end" th:text="${#numbers.formatDecimal(c.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></td>
-                    <td class="text-end" th:text="${#numbers.formatInteger(c.kilometraje, 1, 'POINT')} + ' km'"></td>
-                    <td th:text="${c.combustible.etiqueta}"></td>
-                    <td th:text="${c.transmision.etiqueta}"></td>
-                    <td class="text-end text-nowrap">
-                        <a th:href="@{/coches/{id}(id=${c.id})}" class="btn btn-sm btn-outline-secondary" title="Ver">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a th:href="@{/coches/{id}/editar(id=${c.id})}" class="btn btn-sm btn-outline-primary" title="Editar">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <form th:action="@{/coches/{id}/eliminar(id=${c.id})}" method="post" class="d-inline"
-                              onsubmit="return confirm('¿Seguro que quieres eliminar este coche?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+    <!-- Rejilla de tarjetas -->
+    <div th:unless="${#lists.isEmpty(coches)}" id="grid-coches" class="row g-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        <div class="col" th:each="c : ${coches}"
+             th:attr="data-precio=${c.precio},data-anio=${c.anio},data-kilometraje=${c.kilometraje}">
+
+            <article class="coche-card">
+                <!-- Cabecera con degradado según combustible -->
+                <div class="coche-cover"
+                     th:classappend="${'fuel-' + #strings.toLowerCase(c.combustible.name())}"
+                     th:attr="data-inicial=${#strings.toUpperCase(#strings.substring(c.marca, 0, 1))}">
+                    <div class="coche-marca" th:text="${c.marca}">Marca</div>
+                    <div class="coche-modelo" th:text="${c.modelo}">Modelo</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="placa" th:text="${c.matricula}">0000AAA</span>
+                        <span class="chip-anio" th:text="${c.anio}">2024</span>
+                    </div>
+                </div>
+
+                <!-- Precio y especificaciones -->
+                <div class="coche-body">
+                    <div class="precio">
+                        <span th:text="${#numbers.formatDecimal(c.precio, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                        <small>€</small>
+                    </div>
+
+                    <div class="specs">
+                        <div class="spec">
+                            <i class="bi bi-speedometer2"></i>
+                            <span th:text="${#numbers.formatInteger(c.kilometraje, 1, 'POINT')} + ' km'">0 km</span>
+                        </div>
+                        <div class="spec">
+                            <i th:class="${c.combustible.name() == 'ELECTRICO'} ? 'bi bi-lightning-charge-fill' : 'bi bi-fuel-pump'"></i>
+                            <span th:text="${c.combustible.etiqueta}">Combustible</span>
+                        </div>
+                        <div class="spec">
+                            <i class="bi bi-gear-wide-connected"></i>
+                            <span th:text="${c.transmision.etiqueta}">Transmisión</span>
+                        </div>
+                        <div class="spec">
+                            <i class="bi bi-palette"></i>
+                            <span th:text="${c.color}">Color</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="coche-footer">
+                    <a th:href="@{/coches/{id}(id=${c.id})}" class="btn btn-sm btn-outline-light" title="Ver">
+                        <i class="bi bi-eye"></i> Ver
+                    </a>
+                    <a th:href="@{/coches/{id}/editar(id=${c.id})}" class="btn btn-sm btn-outline-gold" title="Editar">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <form th:action="@{/coches/{id}/eliminar(id=${c.id})}" method="post"
+                          onsubmit="return confirm('¿Seguro que quieres eliminar este coche?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </article>
         </div>
     </div>
 </main>
 
 <th:block th:replace="~{fragments/layout :: footer}"></th:block>
+
+<script>
+    (function () {
+        var grid = document.getElementById('grid-coches');
+        var selector = document.getElementById('orden');
+        if (!grid || !selector) return;
+
+        var original = Array.prototype.slice.call(grid.children);
+
+        selector.addEventListener('change', function () {
+            var partes = selector.value.split(':');
+            var campo = partes[0];
+            var sentido = partes[1] === 'desc' ? -1 : 1;
+            var items = original.slice();
+
+            if (campo !== 'default') {
+                items.sort(function (a, b) {
+                    return (Number(a.dataset[campo]) - Number(b.dataset[campo])) * sentido;
+                });
+            }
+            items.forEach(function (item) { grid.appendChild(item); });
+        });
+    })();
+</script>
 </body>
 </html>
