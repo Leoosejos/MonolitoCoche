@@ -3,6 +3,7 @@ package com.example.MonolitoCoche.service.impl;
 import com.example.MonolitoCoche.exception.CocheNotFoundException;
 import com.example.MonolitoCoche.model.Coche;
 import com.example.MonolitoCoche.repository.CocheDAO;
+import com.example.MonolitoCoche.repository.FiltroCoche;
 import com.example.MonolitoCoche.service.CocheService;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +24,18 @@ public class CocheServiceImpl implements CocheService {
     }
 
     @Override
-    public List<Coche> listarTodos() {
-        return cocheDAO.listarTodos();
+    public List<Coche> buscar(FiltroCoche filtro) {
+        return cocheDAO.buscar(filtro);
+    }
+
+    @Override
+    public long contar(FiltroCoche filtro) {
+        return cocheDAO.contar(filtro);
+    }
+
+    @Override
+    public List<String> listarMarcas() {
+        return cocheDAO.listarMarcas();
     }
 
     @Override

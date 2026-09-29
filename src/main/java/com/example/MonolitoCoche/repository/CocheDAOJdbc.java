@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -24,9 +25,19 @@ import java.util.Optional;
 @Repository
 public class CocheDAOJdbc implements CocheDAO {
 
-    private static final String SELECT_TODOS =
+    private static final String SELECT_CAMPOS =
             "SELECT id, marca, modelo, matricula, anio, color, precio, kilometraje, combustible, transmision "
-                    + "FROM coches ORDER BY marca, modelo";
+                    + "FROM coches";
+
+    private static final String SELECT_MARCAS = "SELECT DISTINCT marca FROM coches ORDER BY marca";
+
+    /** Columnas por las que se puede ordenar, indexadas por el nombre que llega del formulario (evita inyección SQL). */
+    private static final Map<String, String> COLUMNAS_ORDEN = Map.of(
+            "marca", "marca, modelo",
+            "precio", "precio",
+            "anio", "anio",
+            "kilometraje", "kilometraje"
+    );
 
     private static final String SELECT_POR_ID =
             "SELECT id, marca, modelo, matricula, anio, color, precio, kilometraje, combustible, transmision "
@@ -54,17 +65,59 @@ public class CocheDAOJdbc implements CocheDAO {
     // ---------- READ ----------
 
     @Override
-    public List<Coche> listarTodos() {
+    public List<Coche> buscar(FiltroCoche filtro) {
+        StringBuilder where = new StringBuilder();
+        List<Object> parametros = new ArrayList<>();
+        construirWhere(filtro, where, parametros);
+
+        String columnaOrden = COLUMNAS_ORDEN.getOrDefault(filtro.getOrdenarPor(), COLUMNAS_ORDEN.get("marca"));
+        String sentido = "desc".equalsIgnoreCase(filtro.getDireccion()) ? "DESC" : "ASC";
+        String sql = SELECT_CAMPOS + where + " ORDER BY " + columnaOrden + " " + sentido + " LIMIT ? OFFSET ?";
+
         List<Coche> coches = new ArrayList<>();
-        try (PreparedStatement ps = getConnection().prepareStatement(SELECT_TODOS);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                coches.add(mapear(rs));
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            int i = asignarParametros(ps, parametros, 1);
+            ps.setInt(i++, filtro.getTamanioPagina());
+            ps.setInt(i, filtro.getPagina() * filtro.getTamanioPagina());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    coches.add(mapear(rs));
+                }
             }
         } catch (SQLException e) {
             throw new AccesoDatosException("Error al listar los coches", e);
         }
         return coches;
+    }
+
+    @Override
+    public long contar(FiltroCoche filtro) {
+        StringBuilder where = new StringBuilder();
+        List<Object> parametros = new ArrayList<>();
+        construirWhere(filtro, where, parametros);
+
+        try (PreparedStatement ps = getConnection().prepareStatement("SELECT COUNT(*) FROM coches" + where)) {
+            asignarParametros(ps, parametros, 1);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getLong(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new AccesoDatosException("Error al contar los coches", e);
+        }
+    }
+
+    @Override
+    public List<String> listarMarcas() {
+        List<String> marcas = new ArrayList<>();
+        try (PreparedStatement ps = getConnection().prepareStatement(SELECT_MARCAS);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                marcas.add(rs.getString("marca"));
+            }
+        } catch (SQLException e) {
+            throw new AccesoDatosException("Error al listar las marcas", e);
+        }
+        return marcas;
     }
 
     @Override
@@ -138,6 +191,38 @@ public class CocheDAOJdbc implements CocheDAO {
         } catch (SQLException e) {
             throw new AccesoDatosException("Error al comprobar la matrícula", e);
         }
+    }
+
+    // ---------- Construcción dinámica del WHERE ----------
+
+    /** Añade una condición "columna IN (?,?,...)" por cada filtro con valores, unidas con AND. */
+    private void construirWhere(FiltroCoche filtro, StringBuilder where, List<Object> parametros) {
+        List<String> condiciones = new ArrayList<>();
+        agregarFiltroIn("combustible", filtro.getCombustibles(), condiciones, parametros);
+        agregarFiltroIn("transmision", filtro.getTransmisiones(), condiciones, parametros);
+        agregarFiltroIn("marca", filtro.getMarcas(), condiciones, parametros);
+
+        if (!condiciones.isEmpty()) {
+            where.append(" WHERE ").append(String.join(" AND ", condiciones));
+        }
+    }
+
+    private void agregarFiltroIn(String columna, List<String> valores, List<String> condiciones, List<Object> parametros) {
+        if (valores == null || valores.isEmpty()) {
+            return;
+        }
+        String interrogantes = String.join(",", valores.stream().map(v -> "?").toList());
+        condiciones.add(columna + " IN (" + interrogantes + ")");
+        parametros.addAll(valores);
+    }
+
+    /** @return el siguiente índice libre de parámetro, para poder seguir asignando (LIMIT, OFFSET...) a continuación. */
+    private int asignarParametros(PreparedStatement ps, List<Object> parametros, int desde) throws SQLException {
+        int i = desde;
+        for (Object valor : parametros) {
+            ps.setString(i++, (String) valor);
+        }
+        return i;
     }
 
     // ---------- Auxiliares de mapeo ----------

@@ -1,6 +1,7 @@
 package com.example.MonolitoCoche.service;
 
 import com.example.MonolitoCoche.model.Coche;
+import com.example.MonolitoCoche.repository.FiltroCoche;
 
 import java.util.List;
 
@@ -11,7 +12,13 @@ import java.util.List;
  */
 public interface CocheService {
 
-    List<Coche> listarTodos();
+    /** Coches de la página pedida, ya filtrados y ordenados. */
+    List<Coche> buscar(FiltroCoche filtro);
+
+    /** Total de coches que cumplen el filtro (sin paginar), para calcular el número de páginas. */
+    long contar(FiltroCoche filtro);
+
+    List<String> listarMarcas();
 
     Coche buscarPorId(Long id);
 
