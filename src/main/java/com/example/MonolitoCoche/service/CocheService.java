@@ -1,6 +1,8 @@
 package com.example.MonolitoCoche.service;
 
 import com.example.MonolitoCoche.model.Coche;
+import com.example.MonolitoCoche.repository.FiltroCoche;
+import com.example.MonolitoCoche.repository.Pagina;
 
 import java.util.List;
 
@@ -11,7 +13,9 @@ import java.util.List;
  */
 public interface CocheService {
 
-    List<Coche> listarTodos();
+    Pagina<Coche> buscar(FiltroCoche filtro);
+
+    List<String> listarMarcas();
 
     Coche buscarPorId(Long id);
 

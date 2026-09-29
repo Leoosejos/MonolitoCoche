@@ -10,7 +10,11 @@ import java.util.Optional;
  */
 public interface CocheDAO {
 
-    List<Coche> listarTodos();
+    /** Aplica filtros, orden y paginación (todo en la propia consulta SQL, no en memoria). */
+    Pagina<Coche> buscar(FiltroCoche filtro);
+
+    /** Marcas distintas que existen en la tabla, para pintar el checklist de filtros. */
+    List<String> listarMarcas();
 
     Optional<Coche> obtenerPorId(Long id);
 
