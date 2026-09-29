@@ -65,42 +65,45 @@ public class CocheDAOJdbc implements CocheDAO {
     // ---------- READ ----------
 
     @Override
-    public Pagina<Coche> buscar(FiltroCoche filtro) {
+    public List<Coche> buscar(FiltroCoche filtro) {
         StringBuilder where = new StringBuilder();
         List<Object> parametros = new ArrayList<>();
         construirWhere(filtro, where, parametros);
 
         String columnaOrden = COLUMNAS_ORDEN.getOrDefault(filtro.getOrdenarPor(), COLUMNAS_ORDEN.get("marca"));
         String sentido = "desc".equalsIgnoreCase(filtro.getDireccion()) ? "DESC" : "ASC";
+        String sql = SELECT_CAMPOS + where + " ORDER BY " + columnaOrden + " " + sentido + " LIMIT ? OFFSET ?";
 
-        String sqlDatos = SELECT_CAMPOS + where + " ORDER BY " + columnaOrden + " " + sentido + " LIMIT ? OFFSET ?";
-        String sqlTotal = "SELECT COUNT(*) FROM coches" + where;
-
-        List<Coche> contenido = new ArrayList<>();
-        try (PreparedStatement ps = getConnection().prepareStatement(sqlDatos)) {
+        List<Coche> coches = new ArrayList<>();
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             int i = asignarParametros(ps, parametros, 1);
             ps.setInt(i++, filtro.getTamanioPagina());
             ps.setInt(i, filtro.getPagina() * filtro.getTamanioPagina());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    contenido.add(mapear(rs));
+                    coches.add(mapear(rs));
                 }
             }
         } catch (SQLException e) {
             throw new AccesoDatosException("Error al listar los coches", e);
         }
+        return coches;
+    }
 
-        long total;
-        try (PreparedStatement ps = getConnection().prepareStatement(sqlTotal)) {
+    @Override
+    public long contar(FiltroCoche filtro) {
+        StringBuilder where = new StringBuilder();
+        List<Object> parametros = new ArrayList<>();
+        construirWhere(filtro, where, parametros);
+
+        try (PreparedStatement ps = getConnection().prepareStatement("SELECT COUNT(*) FROM coches" + where)) {
             asignarParametros(ps, parametros, 1);
             try (ResultSet rs = ps.executeQuery()) {
-                total = rs.next() ? rs.getLong(1) : 0;
+                return rs.next() ? rs.getLong(1) : 0;
             }
         } catch (SQLException e) {
             throw new AccesoDatosException("Error al contar los coches", e);
         }
-
-        return new Pagina<>(contenido, total, filtro.getPagina(), filtro.getTamanioPagina());
     }
 
     @Override

@@ -10,8 +10,11 @@ import java.util.Optional;
  */
 public interface CocheDAO {
 
-    /** Aplica filtros, orden y paginación (todo en la propia consulta SQL, no en memoria). */
-    Pagina<Coche> buscar(FiltroCoche filtro);
+    /** Trae solo la página pedida, ya filtrada y ordenada en la propia consulta SQL (LIMIT/OFFSET). */
+    List<Coche> buscar(FiltroCoche filtro);
+
+    /** Cuántos coches cumplen el filtro en total (para pintar el paginador), sin aplicar LIMIT/OFFSET. */
+    long contar(FiltroCoche filtro);
 
     /** Marcas distintas que existen en la tabla, para pintar el checklist de filtros. */
     List<String> listarMarcas();

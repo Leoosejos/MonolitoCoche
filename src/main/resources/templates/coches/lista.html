@@ -13,25 +13,13 @@
     <form id="form-filtros" method="get" th:action="@{/coches}">
         <input type="hidden" name="orden" id="ordenInput" th:value="${orden}">
 
-        <!-- Cabecera: título, orden, filtros y botón de alta -->
+        <!-- Cabecera: título, filtros y botón de alta -->
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <h1 class="h3 mb-0 titulo-seccion">
-                Coches <span class="badge rounded-pill contador" th:text="${pagina.totalElementos}">0</span>
+                Coches <span class="badge rounded-pill contador" th:text="${totalCoches}">0</span>
             </h1>
 
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <select class="form-select form-select-sm w-auto" aria-label="Ordenar coches"
-                        th:value="${orden}"
-                        onchange="document.getElementById('ordenInput').value=this.value; document.getElementById('form-filtros').submit();">
-                    <option value="marca:asc" th:selected="${orden == 'marca:asc'}">Orden: marca y modelo</option>
-                    <option value="precio:asc" th:selected="${orden == 'precio:asc'}">Precio: menor a mayor</option>
-                    <option value="precio:desc" th:selected="${orden == 'precio:desc'}">Precio: mayor a menor</option>
-                    <option value="anio:desc" th:selected="${orden == 'anio:desc'}">Año: más nuevo primero</option>
-                    <option value="anio:asc" th:selected="${orden == 'anio:asc'}">Año: más antiguo primero</option>
-                    <option value="kilometraje:asc" th:selected="${orden == 'kilometraje:asc'}">Kilometraje: menor a mayor</option>
-                    <option value="kilometraje:desc" th:selected="${orden == 'kilometraje:desc'}">Kilometraje: mayor a menor</option>
-                </select>
-
                 <button type="button" class="btn btn-outline-gold position-relative"
                         data-bs-toggle="offcanvas" data-bs-target="#panelFiltros">
                     <i class="bi bi-funnel"></i> Filtros
@@ -52,6 +40,20 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
             </div>
             <div class="offcanvas-body d-flex flex-column">
+
+                <fieldset class="mb-4">
+                    <legend class="filtro-titulo">Ordenar por</legend>
+                    <select class="form-select form-select-sm"
+                            onchange="document.getElementById('ordenInput').value=this.value; document.getElementById('form-filtros').submit();">
+                        <option value="marca:asc" th:selected="${orden == 'marca:asc'}">Marca y modelo</option>
+                        <option value="precio:asc" th:selected="${orden == 'precio:asc'}">Precio: menor a mayor</option>
+                        <option value="precio:desc" th:selected="${orden == 'precio:desc'}">Precio: mayor a menor</option>
+                        <option value="anio:desc" th:selected="${orden == 'anio:desc'}">Año: más nuevo primero</option>
+                        <option value="anio:asc" th:selected="${orden == 'anio:asc'}">Año: más antiguo primero</option>
+                        <option value="kilometraje:asc" th:selected="${orden == 'kilometraje:asc'}">Kilometraje: menor a mayor</option>
+                        <option value="kilometraje:desc" th:selected="${orden == 'kilometraje:desc'}">Kilometraje: mayor a menor</option>
+                    </select>
+                </fieldset>
 
                 <fieldset class="mb-4">
                     <legend class="filtro-titulo">Combustible</legend>
@@ -163,30 +165,30 @@
     </div>
 
     <!-- Paginación: 5 coches por página, conservando filtros y orden en cada enlace -->
-    <nav th:if="${pagina.totalElementos > 0}" aria-label="Paginación de coches"
+    <nav th:if="${totalCoches > 0}" aria-label="Paginación de coches"
          class="mt-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
         <span class="text-body-secondary small">
-            Mostrando <strong th:text="${pagina.primerElemento}">1</strong>-<strong th:text="${pagina.ultimoElemento}">5</strong>
-            de <strong th:text="${pagina.totalElementos}">10</strong> coches
+            Mostrando <strong th:text="${primerElemento}">1</strong>-<strong th:text="${ultimoElemento}">5</strong>
+            de <strong th:text="${totalCoches}">10</strong> coches
         </span>
 
         <ul class="pagination mb-0">
-            <li class="page-item" th:classappend="${!pagina.hayAnterior} ? 'disabled'">
+            <li class="page-item" th:classappend="${!hayAnterior} ? 'disabled'">
                 <a class="page-link"
-                   th:href="@{/coches(pagina=${pagina.pagina - 1}, combustible=${filtro.combustibles}, transmision=${filtro.transmisiones}, marca=${filtro.marcas}, orden=${orden})}"
+                   th:href="@{/coches(pagina=${paginaActual - 1}, combustible=${filtro.combustibles}, transmision=${filtro.transmisiones}, marca=${filtro.marcas}, orden=${orden})}"
                    aria-label="Anterior">
                     <i class="bi bi-chevron-left"></i>
                 </a>
             </li>
-            <li class="page-item" th:each="p : ${#numbers.sequence(0, pagina.totalPaginas - 1)}"
-                th:classappend="${p == pagina.pagina} ? 'active'">
+            <li class="page-item" th:each="p : ${#numbers.sequence(0, totalPaginas - 1)}"
+                th:classappend="${p == paginaActual} ? 'active'">
                 <a class="page-link"
                    th:href="@{/coches(pagina=${p}, combustible=${filtro.combustibles}, transmision=${filtro.transmisiones}, marca=${filtro.marcas}, orden=${orden})}"
                    th:text="${p + 1}">1</a>
             </li>
-            <li class="page-item" th:classappend="${!pagina.haySiguiente} ? 'disabled'">
+            <li class="page-item" th:classappend="${!haySiguiente} ? 'disabled'">
                 <a class="page-link"
-                   th:href="@{/coches(pagina=${pagina.pagina + 1}, combustible=${filtro.combustibles}, transmision=${filtro.transmisiones}, marca=${filtro.marcas}, orden=${orden})}"
+                   th:href="@{/coches(pagina=${paginaActual + 1}, combustible=${filtro.combustibles}, transmision=${filtro.transmisiones}, marca=${filtro.marcas}, orden=${orden})}"
                    aria-label="Siguiente">
                     <i class="bi bi-chevron-right"></i>
                 </a>

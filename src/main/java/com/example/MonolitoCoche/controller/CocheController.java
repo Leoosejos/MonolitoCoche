@@ -4,7 +4,6 @@ import com.example.MonolitoCoche.model.Coche;
 import com.example.MonolitoCoche.model.enums.Combustible;
 import com.example.MonolitoCoche.model.enums.Transmision;
 import com.example.MonolitoCoche.repository.FiltroCoche;
-import com.example.MonolitoCoche.repository.Pagina;
 import com.example.MonolitoCoche.service.CocheService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -55,16 +54,31 @@ public class CocheController {
         filtro.setMarcas(marcas == null ? List.of() : marcas);
         filtro.setOrdenarPor(ordenPartes[0]);
         filtro.setDireccion(ordenPartes.length > 1 ? ordenPartes[1] : "asc");
-        filtro.setPagina(Math.max(pagina, 0));
         filtro.setTamanioPagina(COCHES_POR_PAGINA);
 
-        Pagina<Coche> resultado = cocheService.buscar(filtro);
+        // Se cuenta primero para saber cuántas páginas hay de verdad, y así acotar
+        // la página pedida antes de consultar (si piden una fuera de rango, se ajusta a la última).
+        filtro.setPagina(0);
+        long totalCoches = cocheService.contar(filtro);
+        int totalPaginas = (int) Math.max(1, Math.ceil(totalCoches / (double) COCHES_POR_PAGINA));
+        int paginaActual = Math.min(Math.max(pagina, 0), totalPaginas - 1);
+        filtro.setPagina(paginaActual);
 
-        model.addAttribute("coches", resultado.getContenido());
-        model.addAttribute("pagina", resultado);
+        List<Coche> coches = cocheService.buscar(filtro);
+        long primerElemento = totalCoches == 0 ? 0 : (long) paginaActual * COCHES_POR_PAGINA + 1;
+        long ultimoElemento = Math.min((long) (paginaActual + 1) * COCHES_POR_PAGINA, totalCoches);
+
+        model.addAttribute("coches", coches);
         model.addAttribute("filtro", filtro);
         model.addAttribute("orden", orden);
         model.addAttribute("marcasDisponibles", cocheService.listarMarcas());
+        model.addAttribute("totalCoches", totalCoches);
+        model.addAttribute("totalPaginas", totalPaginas);
+        model.addAttribute("paginaActual", paginaActual);
+        model.addAttribute("hayAnterior", paginaActual > 0);
+        model.addAttribute("haySiguiente", paginaActual < totalPaginas - 1);
+        model.addAttribute("primerElemento", primerElemento);
+        model.addAttribute("ultimoElemento", ultimoElemento);
         return VISTA_LISTA;
     }
 
