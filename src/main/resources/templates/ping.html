@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Ping</title>
-</head>
-<body>
-    <h1>pong</h1>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head th:replace="~{fragments/layout :: head('Ping')}"></head>
+<body class="tema-premium">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container text-center py-5">
+    <h1 class="display-1 fw-bold error-404">pong</h1>
+    <p class="lead text-body-secondary">La aplicación está viva.</p>
+    <a th:href="@{/coches}" class="btn btn-gold"><i class="bi bi-arrow-left"></i> Volver al listado</a>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
 </body>
 </html>
